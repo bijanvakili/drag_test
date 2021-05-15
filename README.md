@@ -4,8 +4,8 @@ Drag and Drop Experiment
 
 ## Minimal Requirements
 
-* [Node.js](https://nodejs.org/)
-* [yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/)
+- [yarn](https://yarnpkg.com/)
 
 ## Setup
 
@@ -14,13 +14,30 @@ Install all the required Javascript packages.
     yarn set version berry
     yarn install
 
+Set up for VSCode
+
+    yarn dlx @yarnpkg/pnpify --sdk vscode
+
 Build the source:
 
-    yarn run build
+    yarn run build:dev
 
 ## Execution
 
-    yarn run main
+To run in hot module reloading mode:
+
+    yarn run start
+
+To create a production build:
+
+    yarn run build:prod
+
+## Running
+
+To open the SPA in your browser:
+
+    open dist/index.html
+
 ## git hooks
 
 Set up the git pre-commit hook as follows:
