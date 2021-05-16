@@ -1,4 +1,44 @@
 h1 {
-  color: white;
-  background-color: black;
+  color: darkmagenta;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+}
+
+.workspace {
+  border-color: black;
+  border-width: 2px;
+  border-radius: 30px;
+  border-style: solid;
+  height: 600px;
+
+  .node {
+    fill: lightblue;
+    stroke: black;
+    stroke-width: 2px;
+    cursor: move;
+
+    &-label {
+      stroke: darkmagenta;
+      text-anchor: middle;
+    }
+
+    &-dragging {
+      filter: drop-shadow(2px 2px 1px black);
+    }
+  }
 }

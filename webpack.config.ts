@@ -1,7 +1,7 @@
-const webpack = require("webpack");
-const path = require("path");
+import * as path from "path";
+import * as webpack from "webpack";
 
-const config = {
+const config: webpack.Configuration = {
   entry: {
     app: ["react-hot-loader/patch", "./src/index.tsx"],
     index: "./src/index.html",
@@ -13,6 +13,7 @@ const config = {
   devServer: {
     contentBase: "./dist",
   },
+  devtool: "source-map",
   module: {
     rules: [
       {
@@ -30,7 +31,14 @@ const config = {
       },
       {
         test: /\.ts(x)?$/,
-        loader: "ts-loader",
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.json",
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
       {
