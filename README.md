@@ -18,9 +18,13 @@ Set up for VSCode
 
     yarn dlx @yarnpkg/pnpify --sdk vscode
 
-Build the source:
+Build the vendor packages:
 
-    yarn run build:dev
+    yarn run build:vendor
+
+Build the application source:
+
+    yarn run build:app
 
 ## Execution
 
@@ -30,6 +34,7 @@ To run in hot module reloading mode:
 
 To create a production build:
 
+    yarn run clean
     yarn run build:prod
 
 ## Running

@@ -5,3 +5,4 @@ dist/
 tmp/
 *.sh
 yarn.lock
+*.ejs
