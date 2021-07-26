@@ -2,61 +2,36 @@ import * as React from "react";
 import * as d3 from "d3-selection";
 import * as d3drag from "d3-drag";
 
+import { ApiContext } from "./api";
+import { VertexMap, Vertex, Position } from "./models";
+
 const radius = 25;
-const diameter = radius * 2;
-const margin = radius * 1.5;
 const textPadding = radius / 4;
-const innerNodePadding = radius * 2;
-
-interface Position {
-  x: number;
-  y: number;
-}
-interface Node {
-  id: string;
-  position: Position;
-}
-
-interface NodeMap {
-  [key: string]: Node;
-}
 
 interface State {
-  nodes: NodeMap;
+  receivedVertices: boolean;
+  vertices: VertexMap;
 }
 
-function makeInitialState() {
-  const state: State = {
-    nodes: {},
+function makeInitialState(): State {
+  return {
+    receivedVertices: false,
+    vertices: {},
   };
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      const id = `${i * 3 + j + 1}`;
-      state.nodes[id] = {
-        id,
-        position: {
-          x: margin + i * (diameter + innerNodePadding),
-          y: margin + j * (diameter + innerNodePadding),
-        },
-      };
-    }
-  }
-
-  return state;
 }
 
 type D3Svg = d3.Selection<SVGSVGElement, any, d3.BaseType, any>;
-type MoveNodeFunc = (id: string, position: Position) => void;
+type MoveVertexFunc = (id: string, position: Position) => void;
 
-function render(svg: D3Svg, nodes: NodeMap, onMoveNode: MoveNodeFunc) {
+function render(svg: D3Svg, vertices: VertexMap, onMoveNode: MoveVertexFunc) {
   svg
-    .selectAll<SVGGElement, Node>("g")
-    .data(Object.values(nodes), (n) => n.id)
+    .selectAll<SVGGElement, Vertex>("g")
+    .data(Object.values(vertices), (v) => v.id)
     .join((enter) => {
       const group = enter.append("g");
       group.call(
         d3drag
-          .drag<SVGGElement, Node>()
+          .drag<SVGGElement, Vertex>()
           .on("start", function (this) {
             d3.select(this).classed("node-dragging", true);
           })
@@ -82,11 +57,13 @@ function render(svg: D3Svg, nodes: NodeMap, onMoveNode: MoveNodeFunc) {
         .text((n) => n.id);
       return group;
     })
-    .attr("transform", (n) => `translate(${n.position.x} ${n.position.y})`);
+    .attr("transform", (v) => `translate(${v.position.x} ${v.position.y})`);
 }
 
 export const WorkspaceComponent: React.FC = () => {
   const [state, setState] = React.useState(makeInitialState);
+  const apiContext = React.useContext(ApiContext);
+  const api = apiContext.api;
   const svgRef = React.useRef<SVGSVGElement>(null);
 
   React.useEffect(() => {
@@ -95,9 +72,11 @@ export const WorkspaceComponent: React.FC = () => {
     }
 
     const onMoveNode = (id: string, position: Position) => {
+      api.saveVertex({ id, position });
       setState({
-        nodes: {
-          ...state.nodes,
+        ...state,
+        vertices: {
+          ...state.vertices,
           [id]: {
             id,
             position,
@@ -107,8 +86,24 @@ export const WorkspaceComponent: React.FC = () => {
     };
 
     const svg = d3.select(svgRef.current as SVGSVGElement);
-    render(svg, state.nodes, onMoveNode);
+    render(svg, state.vertices, onMoveNode);
   }, [svgRef.current]);
+
+  if (!state.receivedVertices) {
+    api.onReceiveVertices((vertices) => {
+      setState({
+        receivedVertices: true,
+        vertices: vertices.reduce(
+          (accum, v) => ({
+            ...accum,
+            [v.id]: v,
+          }),
+          {}
+        ),
+      });
+    });
+    api.connect();
+  }
 
   return (
     <div className="row workspace">
